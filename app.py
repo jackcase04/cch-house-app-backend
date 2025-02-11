@@ -12,7 +12,7 @@ swagger_template = {
     "info": {
         "title": "Chores API",
         "description": "API for managing chores and names",
-        "version": "1.0.0"
+        "version": "1.0.5"
     },
     "securityDefinitions": {
         "ApiKeyAuth": {
@@ -50,11 +50,11 @@ def get_db_connection():
 @app.route('/')
 def hello_world():
     """
-    Hello World
+    Test endpoint to check if the API is running
     ---
     responses:
       200:
-        description: Returns a simple greeting
+        description: Returns a simple message
     """
     return 'Add "/apidocs" to the URL to access the API documentation.'
 
@@ -90,7 +90,7 @@ def get_chores():
     cursor = conn.cursor()
     
     # Fetch all chores sorting by date
-    cursor.execute('SELECT * FROM chores ORDER BY date ASC;')
+    cursor.execute('SELECT date, name, description FROM chores ORDER BY date ASC;')
     chores = cursor.fetchall()
     
     # Format the results into a list of dictionaries
@@ -145,7 +145,7 @@ def get_named_chores(name):
     cursor = conn.cursor()
     
     # Fetch chores corresponding to name sorting by date
-    cursor.execute("SELECT * FROM chores WHERE name = %s ORDER BY date ASC;", (name,))
+    cursor.execute("SELECT date, name, description FROM chores WHERE name = %s ORDER BY date ASC;", (name,))
 
     chores = cursor.fetchall()
     
@@ -170,7 +170,7 @@ def get_named_chores(name):
 @require_api_key
 def get_named_dated_chores(name, date):
     """
-    Get chore from the database that correspond to a name and date
+    Get chore from the database that corresponds to a name and date
     ---
     parameters:
       - in: path
@@ -204,22 +204,22 @@ def get_named_dated_chores(name, date):
                 example: "Take out the trash"
       401:
         description: Unauthorized - Invalid or missing API key
+      401:
+        description: Chore not found
     """
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    # Fetch chores corresponding to name and date sorting by date
-    cursor.execute('SELECT * FROM chores WHERE name = %s AND "date" = %s', (name, date))
+    # Fetch chore corresponding to name and date sorting by date
+    cursor.execute('SELECT description FROM chores WHERE name = %s AND "date" = %s', (name, date))
 
     chores = cursor.fetchall()
     
-    # Format the results into a list of dictionaries
+    # Format the result into a list of dictionaries
     chore_list = []
     for chore in chores:
         chore_list.append({
-            'date': chore[0],
-            'name': chore[1],
-            'description': chore[2]
+            'description': chore[0]
         })
     
     cursor.close()
@@ -253,7 +253,7 @@ def get_names():
     cursor = conn.cursor()
     
     # Fetch all names
-    cursor.execute('SELECT * FROM names;')
+    cursor.execute('SELECT name FROM names;')
     names = cursor.fetchall()
     
     names_list = []

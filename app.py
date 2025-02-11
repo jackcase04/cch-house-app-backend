@@ -56,13 +56,13 @@ def hello_world():
       200:
         description: Returns a simple greeting
     """
-    return 'Hello World'
+    return 'Add "/apidocs" to the URL to access the API documentation.'
 
 @app.route('/chores', methods=['GET'])
 @require_api_key
 def get_chores():
     """
-    Get all chores from the database
+    Test endpoint to Get all chores from the database
     ---
     security:
       - ApiKeyAuth: []
@@ -146,6 +146,67 @@ def get_named_chores(name):
     
     # Fetch all chores sorting by date
     cursor.execute("SELECT * FROM chores WHERE name = %s ORDER BY date ASC;", (name,))
+
+    chores = cursor.fetchall()
+    
+    # Format the results into a list of dictionaries
+    chore_list = []
+    for chore in chores:
+        chore_list.append({
+            'date': chore[0],
+            'name': chore[1],
+            'description': chore[2]
+        })
+    
+    cursor.close()
+    conn.close()
+    
+    return jsonify(chore_list)
+
+@app.route('/chores/<name><date>', methods=['GET'])
+@require_api_key
+def get_named_dated_chores(name, date):
+    """
+    Get chore from the database that correspond to a name and date
+    ---
+    parameters:
+      - in: path
+        name: name
+        type: string
+        required: true
+        description: The name of the person whose chore you want to retrieve
+      - in: path
+        name: date
+        type: string
+        required: true
+        description: The date of the chore you want to retrieve
+    security:
+      - ApiKeyAuth: []
+    responses:
+      200:
+        description: A list of chores
+        schema:
+          type: array
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+                example: "2025-02-05"
+              name:
+                type: string
+                example: "Jack"
+              description:
+                type: string
+                example: "Take out the trash"
+      401:
+        description: Unauthorized - Invalid or missing API key
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    # Fetch all chores sorting by date
+    cursor.execute("SELECT * FROM chores WHERE name = %s AND date = %s ORDER BY date ASC;", (name, date))
 
     chores = cursor.fetchall()
     

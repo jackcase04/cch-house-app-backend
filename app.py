@@ -206,7 +206,7 @@ def get_named_dated_chores(name, date):
     cursor = conn.cursor()
     
     # Fetch all chores sorting by date
-    cursor.execute("SELECT * FROM chores WHERE name = %s AND date = %s ORDER BY date ASC;", (name, date))
+    cursor.execute("SELECT * FROM chores WHERE name = %s AND \"date\" = %s ORDER BY \"date\" ASC;", (name, date))
 
     chores = cursor.fetchall()
     

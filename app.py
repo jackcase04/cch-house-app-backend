@@ -144,7 +144,7 @@ def get_named_chores(name):
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    # Fetch all chores sorting by date
+    # Fetch chores corresponding to name sorting by date
     cursor.execute("SELECT * FROM chores WHERE name = %s ORDER BY date ASC;", (name,))
 
     chores = cursor.fetchall()
@@ -160,10 +160,13 @@ def get_named_chores(name):
     
     cursor.close()
     conn.close()
-    
-    return jsonify(chore_list)
 
-@app.route('/chores/<name><date>', methods=['GET'])
+    if not chores:
+      return jsonify({'message': 'No chores found'}), 404
+    else:
+      return jsonify(chore_list)
+
+@app.route('/chores/<name>/date/<path:date>', methods=['GET'])
 @require_api_key
 def get_named_dated_chores(name, date):
     """
@@ -205,8 +208,8 @@ def get_named_dated_chores(name, date):
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    # Fetch all chores sorting by date
-    cursor.execute("SELECT * FROM chores WHERE name = %s AND \"date\" = %s ORDER BY \"date\" ASC;", (name, date))
+    # Fetch chores corresponding to name and date sorting by date
+    cursor.execute('SELECT * FROM chores WHERE name = %s AND "date" = %s', (name, date))
 
     chores = cursor.fetchall()
     
@@ -222,7 +225,10 @@ def get_named_dated_chores(name, date):
     cursor.close()
     conn.close()
     
-    return jsonify(chore_list)
+    if not chores:
+      return jsonify({'message': 'No chores found'}), 404
+    else:
+      return jsonify(chore_list)
 
 @app.route('/names', methods=['GET'])
 @require_api_key

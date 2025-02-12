@@ -6,11 +6,11 @@ from functools import wraps
 
 app = Flask(__name__)
 
-#Swagger template to enforce API key
+#Swagger template (enforces API key)
 swagger_template = {
     "swagger": "2.0",
     "info": {
-        "title": "Chores API",
+        "title": "CCH App Chores API",
         "description": "API for managing chores and names",
         "version": "1.0.5"
     },
@@ -30,6 +30,7 @@ swagger_template = {
 
 swagger = Swagger(app, template=swagger_template)
 
+# gets API key from environment variable and checks if it matches the one in the request
 def require_api_key(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -40,6 +41,7 @@ def require_api_key(f):
         return f(*args, **kwargs)
     return decorated_function
 
+#connects to the database using the DATABASE_URL environment variable
 def get_db_connection():
     conn = psycopg2.connect(
         os.getenv('DATABASE_URL'),
@@ -47,6 +49,7 @@ def get_db_connection():
     )
     return conn
 
+# Test endpoint to check if the API is running
 @app.route('/')
 def hello_world():
     """
@@ -58,6 +61,7 @@ def hello_world():
     """
     return 'Add "/apidocs" to the URL to access the API documentation.'
 
+#Endpoint to get all chores from the database
 @app.route('/chores', methods=['GET'])
 @require_api_key
 def get_chores():
@@ -93,7 +97,6 @@ def get_chores():
     cursor.execute('SELECT date, name, description FROM chores ORDER BY date ASC;')
     chores = cursor.fetchall()
     
-    # Format the results into a list of dictionaries
     chore_list = []
     for chore in chores:
         chore_list.append({
@@ -107,6 +110,7 @@ def get_chores():
     
     return jsonify(chore_list)
 
+#Endpoint to get all chores that correspond to a provided name
 @app.route('/chores/<name>', methods=['GET'])
 @require_api_key
 def get_named_chores(name):
@@ -148,8 +152,7 @@ def get_named_chores(name):
     cursor.execute("SELECT date, name, description FROM chores WHERE name = %s ORDER BY date ASC;", (name,))
 
     chores = cursor.fetchall()
-    
-    # Format the results into a list of dictionaries
+
     chore_list = []
     for chore in chores:
         chore_list.append({
@@ -166,6 +169,7 @@ def get_named_chores(name):
     else:
       return jsonify(chore_list)
 
+#Endpoint to get a chore that corresponds to a provided name and date
 @app.route('/chores/<name>/date/<path:date>', methods=['GET'])
 @require_api_key
 def get_named_dated_chores(name, date):
@@ -221,8 +225,9 @@ def get_named_dated_chores(name, date):
     if not chore:
         return jsonify([{"description": "No chore today"}]), 200
 
-    return jsonify([{"description": chore[0]}]), 200  # Return the chore description inside a list
+    return jsonify([{"description": chore[0]}]), 200
 
+#Endpoint to get all names from the database
 @app.route('/names', methods=['GET'])
 @require_api_key
 def get_names():

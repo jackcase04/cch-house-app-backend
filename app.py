@@ -182,7 +182,7 @@ def get_named_dated_chores(name, date):
         name: date
         type: string
         required: true
-        description: The date of the chore you want to retrieve
+        description: The date of the chore you want to retrieve (MM-DD-YYYY format)(don't pad with zeros)
     security:
       - ApiKeyAuth: []
     responses:
@@ -226,7 +226,7 @@ def get_named_dated_chores(name, date):
     conn.close()
     
     if not chores:
-      return jsonify({'message': 'No chores found'}), 404
+      return jsonify({'description': 'No chores found'}), 404
     else:
       return jsonify(chore_list)
 

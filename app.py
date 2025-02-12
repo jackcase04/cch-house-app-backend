@@ -216,19 +216,15 @@ def get_named_dated_chores(name, date):
     chores = cursor.fetchall()
     
     # Format the result into a list of dictionaries
-    chore_list = []
-    for chore in chores:
-        chore_list.append({
-            'description': chore[0]
-        })
+    chore = chores[0] 
     
     cursor.close()
     conn.close()
     
-    if not chores:
+    if not chore:
       return jsonify({'description': 'No chores found'}), 404
     else:
-      return jsonify(chore_list)
+      return jsonify({'description': chore})
 
 @app.route('/names', methods=['GET'])
 @require_api_key

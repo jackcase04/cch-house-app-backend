@@ -213,18 +213,15 @@ def get_named_dated_chores(name, date):
     # Fetch chore corresponding to name and date sorting by date
     cursor.execute('SELECT description FROM chores WHERE name = %s AND "date" = %s', (name, date))
 
-    chores = cursor.fetchall()
-    
-    # Format the result into a list of dictionaries
-    chore = chores[0] 
+    chore = cursor.fetchone()
     
     cursor.close()
     conn.close()
     
     if not chore:
-      return jsonify({'description': 'No chores found'}), 404
-    else:
-      return jsonify({'description': chore})
+        return jsonify([{"description": "No chore today"}]), 200
+
+    return jsonify([{"description": chore[0]}]), 200  # Return the chore description inside a list
 
 @app.route('/names', methods=['GET'])
 @require_api_key

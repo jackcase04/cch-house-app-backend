@@ -5,6 +5,7 @@ This repo stores all the backend logic for the repo https://github.com/jackcase0
 ## Technologies Used
 
 Backend: PostgreSQL, Python, Flask
+
 Deployment: Railway
 
 ## Process
